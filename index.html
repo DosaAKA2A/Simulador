@@ -351,6 +351,8 @@ function setTab(tab){
   ['cliente','asesor','arbol','ajustes'].forEach(t=>$('tab-'+t).setAttribute('aria-selected',String(t===tab)));
   if(tab in unread){unread[tab]=0;badge(tab)}
   const c=activeChat();if(c)toEnd(c);
+  // El árbol estaba oculto al llegar el mensaje: se lleva ahora al paso iluminado.
+  if(tab==='arbol'){const i=[...$('hist').children].findIndex(b=>b.getAttribute('aria-pressed')==='true');if(i>=0)iluminar(i)}
 }
 ['cliente','asesor','arbol','ajustes'].forEach(t=>{$('tab-'+t).onclick=()=>setTab(t)});
 // Escritorio: simulación completa o el cliente junto al árbol de decisiones.
