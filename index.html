@@ -21,6 +21,9 @@ main{max-width:1200px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,
 .top small{display:block;font-weight:400;opacity:.8}
 .back{background:none;border:0;color:#fff;font-size:24px;line-height:1;padding:2px 8px 4px 0;cursor:pointer;transition:transform 160ms ease-out}
 .back:active{transform:scale(.92)}
+.reset{margin-left:auto;background:rgba(255,255,255,.14);border:0;border-radius:999px;color:#fff;font:500 13px Roboto,sans-serif;padding:7px 12px;min-height:34px;cursor:pointer;white-space:nowrap;transition:background 160ms ease-out,transform 160ms ease-out}
+.reset:hover{background:rgba(255,255,255,.24)}
+.reset:active{transform:scale(.97)}
 .chat{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:8px}
 .b{max-width:84%;padding:8px 10px 6px;border-radius:10px;white-space:pre-wrap;overflow-wrap:anywhere;box-shadow:0 1px 0 rgba(0,0,0,.08);font-size:14px}
 .in{align-self:flex-start;background:#fff;border-top-left-radius:2px}
@@ -148,7 +151,7 @@ main[data-view=arbol]>#p-asesor,main[data-view=arbol]>#p-ajustes{display:none}
   <p class="who">Móvil del cliente</p>
   <section class="phone" aria-label="Móvil del cliente">
     <div class="screen" id="s-bot">
-      <div class="top"><div>Corlima<small>Cuenta de empresa</small></div></div>
+      <div class="top"><div>Corlima<small>Cuenta de empresa</small></div><button class="reset" id="reiniciar" type="button">↻ Reiniciar chat</button></div>
       <div class="chat" id="chat"></div>
       <form class="bar" id="f"><textarea id="t" placeholder="Escribe un mensaje" autocomplete="off" enterkeyhint="send" aria-label="Mensaje al bot"></textarea><button>Enviar</button></form>
     </div>
@@ -173,8 +176,8 @@ main[data-view=arbol]>#p-asesor,main[data-view=arbol]>#p-ajustes{display:none}
   <h2>Cliente de prueba</h2>
   <label for="n">Nombre del perfil</label><input id="n" value="María López">
   <label for="w">Número (sin +)</label><input id="w" value="51900000001" inputmode="numeric" autocomplete="off">
-  <div class="row"><button id="audio" type="button">Mandar un audio</button><button id="nuevo" type="button">Otro cliente</button></div>
-  <p>Cada número de prueba tiene su propia memoria. Pulsa «Otro cliente» para empezar de cero: con negocio, los clientes nuevos van turnándose entre Anthony y García.</p>
+  <div class="row"><button id="audio" type="button">Mandar un audio</button><button id="nuevo" type="button">Reiniciar chat</button></div>
+  <p>Cada número de prueba tiene su propia memoria. Pulsa «Reiniciar chat» para empezar de cero como un cliente nuevo: con negocio, los clientes nuevos van turnándose entre Anthony y García.</p>
   <p>Códigos de pedido de prueba: PRUEBAPAG, PRUEBAPRE, PRUEBAENV, PRUEBACAN.</p>
   <p><a id="ver" href="/panel/chats" target="_blank">Abrir el panel de Carlos →</a></p>
 </aside>
@@ -470,5 +473,6 @@ $('nuevo').onclick=()=>{
   $('who-seller').textContent='Móvil del asesor';$('cli-name').textContent='Sin chat abierto';$('cli-num').textContent='WhatsApp Business del asesor';$('t-sel').disabled=true;
   $('ver').href='/panel/chats';$('ver').textContent='Abrir el panel de Carlos →';
 };
+$('reiniciar').onclick=()=>$('nuevo').click();
 hint();
 </script></body></html>
