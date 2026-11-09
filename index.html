@@ -1,0 +1,474 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,interactive-widget=resizes-content">
+<meta name="theme-color" content="#ffffff">
+<title>Simulador del bot · Corlima</title><link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--azul:#0D287A;--noche:#0A1A4A;--tinta:#161C2D;--gris:#5A6377;--niebla:#F3F5F9;--linea:#DDE2EC;--verde:#1F8A5B;--ambar:#B26A00;--rojo:#BF000C;--fondo:#fff;--salida:cubic-bezier(.23,1,.32,1)}
+*{box-sizing:border-box}
+body{margin:0;font:15px/1.45 Roboto,system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--tinta);background:var(--niebla)}
+header{background:var(--azul);color:#fff;padding:18px 16px}
+header h1{margin:0;font-size:19px;font-weight:700;letter-spacing:.2px}
+header p{margin:4px 0 0;opacity:.8;font-size:13px}
+main{max-width:1180px;margin:0 auto;padding:16px}
+
+main{max-width:1200px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) 260px;gap:16px;align-items:start}
+@media (max-width:1040px){main{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}aside{grid-column:1 / -1}}
+@media (max-width:720px){main{grid-template-columns:minmax(0,1fr)}}
+.who{font-size:12px;font-weight:500;color:var(--gris);text-transform:uppercase;letter-spacing:.4px;margin:0 0 6px 4px}
+.phone{position:relative;background:#EFEAE2;border:1px solid var(--linea);border-radius:16px;height:min(78vh,720px);overflow:hidden}
+.screen{position:absolute;inset:0;display:flex;flex-direction:column;background:#EFEAE2;transition:transform 240ms var(--salida),opacity 240ms var(--salida)}
+.screen.off{transform:translateX(100%);opacity:0;pointer-events:none;visibility:hidden}
+.top{background:#075E54;color:#fff;padding:10px 14px;font-weight:500;display:flex;align-items:center;gap:10px;min-height:56px}
+.top small{display:block;font-weight:400;opacity:.8}
+.back{background:none;border:0;color:#fff;font-size:24px;line-height:1;padding:2px 8px 4px 0;cursor:pointer;transition:transform 160ms ease-out}
+.back:active{transform:scale(.92)}
+.chat{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:8px}
+.b{max-width:84%;padding:8px 10px 6px;border-radius:10px;white-space:pre-wrap;overflow-wrap:anywhere;box-shadow:0 1px 0 rgba(0,0,0,.08);font-size:14px}
+.in{align-self:flex-start;background:#fff;border-top-left-radius:2px}
+.out{align-self:flex-end;background:#D9FDD3;border-top-right-radius:2px}
+.b time{display:block;text-align:right;font-size:11px;color:var(--gris);margin-top:2px;font-variant-numeric:tabular-nums}
+.btns{display:flex;flex-direction:column;margin:6px -10px -6px;border-top:1px solid #E6E6E6}
+.btns button,.btns a{background:none;border:0;border-top:1px solid #EFEFEF;padding:9px;color:#027EB5;font:500 14px Roboto,sans-serif;cursor:pointer;text-decoration:none;text-align:center;transition:transform 160ms ease-out}
+.btns button:active,.btns a:active{transform:scale(.97)}
+.btns>:first-child{border-top:0}
+.btns button:disabled{color:#9AA3B2;cursor:default;transform:none}
+.bar{display:flex;gap:8px;padding:10px;background:#F0F2F5;align-items:flex-end}
+.bar textarea{flex:1;min-width:0;border:0;border-radius:18px;padding:9px 14px;font:14px/1.35 Roboto,sans-serif;resize:none;height:38px;max-height:110px}
+.bar textarea:focus{outline:2px solid #00A884;outline-offset:0}
+.bar button{border:0;border-radius:20px;background:#00A884;color:#fff;padding:0 16px;height:38px;font:500 14px Roboto,sans-serif;cursor:pointer;transition:transform 160ms ease-out}
+.bar button:active{transform:scale(.97)}
+.empty{margin:auto;max-width:250px;text-align:center;color:var(--gris);font-size:14px}
+aside{background:#fff;border:1px solid var(--linea);border-radius:12px;padding:16px;margin-top:24px}
+aside h2{margin:0 0 10px;font-size:15px}
+aside label{display:block;font-size:13px;color:var(--gris);margin:10px 0 4px}
+aside input{width:100%;border:1px solid var(--linea);border-radius:8px;padding:8px 10px;font:14px Roboto,sans-serif}
+aside .row{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+aside .row button{flex:1;border:1px solid var(--linea);background:var(--niebla);border-radius:8px;padding:8px;font:14px Roboto,sans-serif;cursor:pointer;transition:transform 160ms ease-out}
+aside .row button:active{transform:scale(.97)}
+aside p{font-size:13px;color:var(--gris);margin:12px 0 0}
+aside input:focus{outline:2px solid #00A884;outline-offset:-1px}
+aside a,.b a{color:#027EB5}
+html{-webkit-tap-highlight-color:transparent;-webkit-text-size-adjust:100%}
+button,a{touch-action:manipulation}
+button{-webkit-user-select:none;user-select:none}
+.chat{overscroll-behavior:contain}
+.mtabs{display:none}
+
+.tree{background:#fff;border:1px solid var(--linea);border-radius:16px;height:min(78vh,720px);overflow-y:auto;overscroll-behavior:contain}
+.tree-head{position:sticky;top:0;z-index:2;background:#fff;border-bottom:1px solid var(--linea);padding:12px 16px}
+.tree-head h2{margin:0;font-size:16px}
+.tree-head p{margin:2px 0 0;font-size:13px;color:var(--gris)}
+.ruta{margin-top:8px;font-size:13px;display:flex;flex-wrap:wrap;gap:4px 6px;align-items:center;min-height:24px}
+.ruta .msg{font-weight:500}
+.ruta .paso{background:var(--niebla);border-radius:6px;padding:1px 7px}
+.ruta .fin{background:#E3F4EC;color:var(--verde);border-radius:6px;padding:1px 7px;font-weight:500}
+.ruta .sep{color:var(--gris)}
+.hist{display:flex;gap:6px;overflow-x:auto;margin-top:8px;padding-bottom:2px}
+.hist button{flex:none;border:1px solid var(--linea);background:#fff;border-radius:999px;padding:3px 10px;font:13px Roboto,sans-serif;color:var(--tinta);cursor:pointer;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hist button[aria-pressed=true]{background:var(--azul);border-color:var(--azul);color:#fff}
+.sec{padding:14px 16px 6px}
+.sec+.sec{border-top:1px solid var(--linea)}
+.sec h3{margin:0 0 2px;font-size:14px;color:var(--azul)}
+.sec>p{margin:0 0 12px;font-size:12.5px;color:var(--gris)}
+.fila{display:grid;grid-template-columns:minmax(150px,220px) 40px minmax(0,1fr);align-items:start}
+.q{border:1.5px solid var(--azul);background:#F5F7FC;color:var(--noche);border-radius:10px;padding:8px 10px;font-size:13.5px;font-weight:500;transition:background 200ms ease,color 200ms ease,opacity 200ms ease}
+.q small{display:block;font-weight:400;font-size:12px;color:var(--gris);margin-top:2px}
+.q.resto{border-style:dashed;background:#fff}
+.flecha{position:relative;height:36px;font-size:11px;color:var(--gris);text-align:center;padding-top:2px}
+.flecha::after{content:"";position:absolute;left:4px;right:4px;top:20px;border-top:1.5px solid #A9B3C7}
+.flecha::before{content:"";position:absolute;right:3px;top:16px;border:4.5px solid transparent;border-left:6px solid #A9B3C7;border-right:0}
+.outs{display:flex;flex-direction:column;gap:6px;min-width:0}
+.o{border:1px solid var(--linea);border-left:3px solid #A9B3C7;border-radius:8px;padding:6px 10px;font-size:13.5px;background:#fff;transition:background 200ms ease,border-color 200ms ease,opacity 200ms ease,box-shadow 200ms ease}
+.o b{font-weight:500}
+.o small{display:block;color:var(--gris);font-size:12px;margin-top:1px}
+.o .chips{display:flex;flex-wrap:wrap;gap:4px;margin-top:5px}
+.o .chips span{font-size:11.5px;background:var(--niebla);border-radius:5px;padding:1px 6px}
+.o a{color:#027EB5;text-decoration:none;font-size:12px}
+.o.neg{border-left-color:var(--azul)}.o.hog{border-left-color:var(--verde)}.o.ped{border-left-color:var(--ambar)}
+.no{width:min(220px,100%);max-width:220px;text-align:center;font-size:11px;color:var(--gris);height:22px;position:relative}
+.no span{position:relative;background:#fff;padding:0 4px;top:3px}
+.no::before{content:"";position:absolute;left:50%;top:0;bottom:0;border-left:1.5px solid #A9B3C7}
+.tree.lit .q,.tree.lit .o{opacity:.4}
+.tree.lit .q.paso{opacity:1}
+.tree.lit .q.si{opacity:1;background:var(--azul);color:#fff}
+.tree.lit .q.si small{color:#C9D3EE}
+.tree.lit .o.on{opacity:1;background:#E3F4EC;border-color:#9FD4BC;border-left-color:var(--verde);box-shadow:0 0 0 2px #CDEBDD}
+@media (prefers-reduced-motion:reduce){.q,.o{transition:none}}
+@media (max-width:520px){.fila{grid-template-columns:minmax(0,1fr) 28px minmax(0,1.15fr)}.q,.o{font-size:13px}}
+
+header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:10px 24px}
+.vista{display:flex;gap:4px;background:rgba(255,255,255,.12);border-radius:999px;padding:3px}
+.vista button{border:0;background:transparent;color:#fff;border-radius:999px;padding:6px 16px;font:500 13px Roboto,sans-serif;cursor:pointer;transition:background 160ms ease-out,transform 160ms ease-out}
+.vista button:active{transform:scale(.97)}
+.vista button[aria-pressed=true]{background:#fff;color:var(--azul)}
+main[data-view=sim]>#p-arbol{display:none}
+main[data-view=arbol]{grid-template-columns:minmax(300px,400px) minmax(0,1fr)}
+main[data-view=arbol]>#p-asesor,main[data-view=arbol]>#p-ajustes{display:none}
+@media (prefers-reduced-motion:reduce){.screen{transition:opacity 150ms ease}.screen.off{transform:none}}
+/* En el móvil no caben dos teléfonos: cada uno ocupa la pantalla y se cambia con las pestañas. */
+@media (max-width:720px),(max-height:500px) and (pointer:coarse){
+  html,body{height:100%;overflow:hidden;overscroll-behavior:none}
+  body{display:flex;flex-direction:column;height:var(--alto,100dvh)}
+  body>header{display:none}
+  .mtabs{display:flex;background:#fff;border-bottom:1px solid var(--linea);padding-top:env(safe-area-inset-top,0px);flex:none}
+  .mtabs button{flex:1;min-width:0;min-height:46px;padding:0 6px;background:none;border:0;border-bottom:2px solid transparent;color:var(--gris);font:500 14px Roboto,sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;white-space:nowrap}
+  .mtabs button[aria-selected=true]{color:#075E54;border-bottom-color:#075E54}
+  .mtabs button:active{background:var(--niebla)}
+  .mtabs .dot{min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:#00A884;color:#fff;font-size:11px;line-height:18px;text-align:center;font-variant-numeric:tabular-nums}
+  .mtabs .dot[hidden]{display:none}
+  main{display:block;flex:1;min-height:0;width:100%;max-width:none;padding:0;margin:0}
+  main>div,main>aside{display:none;height:100%}
+  main[data-tab=cliente]>#p-cliente,main[data-tab=asesor]>#p-asesor,main[data-tab=ajustes]>#p-ajustes,main[data-tab=arbol]>#p-arbol{display:block}
+  .tree{height:100%;border:0;border-radius:0}
+  .who{display:none}
+  .phone{height:100%;border:0;border-radius:0}
+  .top{padding-left:calc(14px + env(safe-area-inset-left,0px));padding-right:calc(14px + env(safe-area-inset-right,0px))}
+  .back{min-width:44px;min-height:44px;margin:-6px 0 -6px -8px;padding:0 8px 4px}
+  .b{font-size:15px;max-width:88%}
+  .btns button,.btns a{min-height:44px;font-size:15px}
+  .bar{padding:8px calc(8px + env(safe-area-inset-right,0px)) calc(8px + env(safe-area-inset-bottom,0px)) calc(8px + env(safe-area-inset-left,0px))}
+  .bar textarea{font-size:16px;height:44px;border-radius:22px;padding:10px 16px}
+  .bar button{height:44px;border-radius:22px}
+  aside{margin:0;border:0;border-radius:0;background:var(--niebla);overflow-y:auto;overscroll-behavior:contain;padding:16px 16px calc(16px + env(safe-area-inset-bottom,0px))}
+  aside input{font-size:16px;min-height:44px}
+  aside .row button{min-height:44px;background:#fff}
+  aside p a{display:inline-block;padding:10px 0}
+}
+@media (pointer:coarse){.bar textarea,aside input{font-size:16px}}
+#ver{display:none}</style></head><body>
+<header><div><h1>Simulador del bot de recepción</h1><p>Prueba el recorrido completo: el cliente con el bot y después con su asesor. No se envía nada a WhatsApp.</p></div>
+<div class="vista" role="group" aria-label="Vista"><button type="button" id="v-sim" aria-pressed="true">Simulación</button><button type="button" id="v-arbol" aria-pressed="false">Árbol de decisiones</button></div></header>
+<nav class="mtabs" role="tablist" aria-label="Móviles de la simulación">
+  <button type="button" role="tab" id="tab-cliente" aria-selected="true">Cliente<span class="dot" id="dot-cliente" hidden></span></button>
+  <button type="button" role="tab" id="tab-asesor" aria-selected="false"><span id="tab-asesor-txt">Asesor</span><span class="dot" id="dot-asesor" hidden></span></button>
+  <button type="button" role="tab" id="tab-arbol" aria-selected="false">Árbol</button>
+  <button type="button" role="tab" id="tab-ajustes" aria-selected="false">Ajustes</button>
+</nav>
+<main id="app" data-tab="cliente" data-view="sim">
+<div id="p-cliente">
+  <p class="who">Móvil del cliente</p>
+  <section class="phone" aria-label="Móvil del cliente">
+    <div class="screen" id="s-bot">
+      <div class="top"><div>Corlima<small>Cuenta de empresa</small></div></div>
+      <div class="chat" id="chat"></div>
+      <form class="bar" id="f"><textarea id="t" placeholder="Escribe un mensaje" autocomplete="off" enterkeyhint="send" aria-label="Mensaje al bot"></textarea><button>Enviar</button></form>
+    </div>
+    <div class="screen off" id="s-adv">
+      <div class="top"><button class="back" id="back" type="button" aria-label="Volver al chat de Corlima">‹</button><div><span id="adv-name"></span><small>Asesor de Corlima</small></div></div>
+      <div class="chat" id="chat-adv"></div>
+      <form class="bar" id="f-adv"><textarea id="t-adv" placeholder="Escribe un mensaje" enterkeyhint="send" aria-label="Mensaje al asesor"></textarea><button>Enviar</button></form>
+    </div>
+  </section>
+</div>
+<div id="p-asesor">
+  <p class="who" id="who-seller">Móvil del asesor</p>
+  <section class="phone" aria-label="Móvil del asesor">
+    <div class="screen">
+      <div class="top"><div><span id="cli-name">Sin chat abierto</span><small id="cli-num">WhatsApp Business del asesor</small></div></div>
+      <div class="chat" id="chat-sel"><p class="empty" id="sel-empty">Cuando el cliente pulse «Hablar con…» y envíe su mensaje, aquí lo recibe el asesor.</p></div>
+      <form class="bar" id="f-sel"><textarea id="t-sel" placeholder="Responde como el asesor" enterkeyhint="send" aria-label="Respuesta del asesor" disabled></textarea><button>Enviar</button></form>
+    </div>
+  </section>
+</div>
+<aside id="p-ajustes">
+  <h2>Cliente de prueba</h2>
+  <label for="n">Nombre del perfil</label><input id="n" value="María López">
+  <label for="w">Número (sin +)</label><input id="w" value="51900000001" inputmode="numeric" autocomplete="off">
+  <div class="row"><button id="audio" type="button">Mandar un audio</button><button id="nuevo" type="button">Otro cliente</button></div>
+  <p>Cada número de prueba tiene su propia memoria. Pulsa «Otro cliente» para empezar de cero: con negocio, los clientes nuevos van turnándose entre Anthony y García.</p>
+  <p>Códigos de pedido de prueba: PRUEBAPAG, PRUEBAPRE, PRUEBAENV, PRUEBACAN.</p>
+  <p><a id="ver" href="/panel/chats" target="_blank">Abrir el panel de Carlos →</a></p>
+</aside>
+<div id="p-arbol">
+  <p class="who">Lo que decide el bot</p>
+  <div class="tree" id="arbol">
+<div class="tree-head">
+  <h2>Árbol de decisiones</h2>
+  <p>El bot revisa las preguntas de arriba abajo y se queda con la primera que se cumple. Escribe en el móvil del cliente y aquí se ilumina el camino que siguió.</p>
+  <div class="ruta" id="ruta" aria-live="polite"><span class="sep">Todavía no hay mensajes en esta prueba.</span></div>
+  <div class="hist" id="hist" aria-label="Mensajes de esta prueba"></div>
+</div>
+<section class="sec" aria-labelledby="sec-a">
+<h3 id="sec-a">1 · Recepción: cada mensaje que llega</h3>
+<p>Nadie habla con un asesor sin antes elegir una de las tres opciones.</p>
+<div class="fila">
+<div class="q" data-n="d-boton">¿Pulsó un botón?</div>
+<div class="flecha">Sí</div><div class="outs"><div class="o neg" data-n="o-negocio"><b>Tengo un negocio → Anthony o García</b><small>Se turnan los clientes nuevos. Quien ya tiene asesor sigue con él 60 días.</small></div><div class="o hog" data-n="o-hogar"><b>Compra hogar → Jair</b><small>Botón para escribirle y, además, puede seguir preguntándole al bot.</small></div><div class="o ped" data-n="o-pedido"><b>Consultar mi pedido → pide el código</b><small><a href="#sec-c">Ver consulta de pedido ↓</a></small></div><div class="o hog" data-n="o-jair"><b>Hablar con Jair → Jair</b><small>El botón que aparece dentro de la conversación de hogar.</small></div></div></div>
+<div class="no"><span>No</span></div>
+<div class="fila">
+<div class="q" data-n="d-menu">¿Pide el menú?<small>Escribe MENU, INICIO, CAMBIAR…</small></div>
+<div class="flecha">Sí</div><div class="outs"><div class="o " data-n="o-menu"><b>Vuelve a mostrar las tres opciones</b><small>Sirve para cambiar de opción o de asesor.</small></div></div></div>
+<div class="no"><span>No</span></div>
+<div class="fila">
+<div class="q" data-n="d-codigo">¿Está mandando el código de su pedido?<small>Se le pidió hace menos de 60 min</small></div>
+<div class="flecha">Sí</div><div class="outs"><div class="o ped" data-n="o-codigo"><b>Lo busca en la tienda</b><small><a href="#sec-c">Ver consulta de pedido ↓</a></small></div></div></div>
+<div class="no"><span>No</span></div>
+<div class="fila">
+<div class="q" data-n="d-eligio">¿Ya eligió una opción?<small>En los últimos 60 días</small></div>
+<div class="flecha">Sí</div><div class="outs"><div class="o neg" data-n="o-recurrente"><b>Negocio: «¡Hola de nuevo!» y el botón de su asesor</b><small>Con su nuevo mensaje ya escrito para el asesor.</small></div><div class="o hog" data-n="o-conversa"><b>Hogar: el bot le contesta</b><small><a href="#sec-b">Ver cliente de hogar ↓</a></small></div></div></div>
+<div class="no"><span>No</span></div>
+<div class="fila">
+<div class="q resto" data-n="d-resto">Todavía no ha elegido</div>
+<div class="flecha"></div><div class="outs"><div class="o " data-n="o-bienvenida"><b>Primer mensaje: bienvenida con las 3 opciones</b><small>Tengo un negocio · Compra hogar · Consultar mi pedido</small></div><div class="o " data-n="o-insiste"><b>Siguientes: insiste hasta que pulse un botón</b><small>No contesta nada más. Lo que escribió se guarda y le llega al asesor.</small></div></div></div>
+</section>
+<section class="sec" aria-labelledby="sec-b">
+<h3 id="sec-b">2 · Cliente de hogar que le escribe al bot</h3>
+<p>Siempre termina con dos botones: hablar con Jair o consultar el pedido.</p>
+<div class="fila">
+<div class="q" data-n="h-media">¿Mandó audio, foto o archivo?</div>
+<div class="flecha">Sí</div><div class="outs"><div class="o hog" data-n="h-media-o"><b>«No te he entendido» y los botones</b><small>El bot solo lee texto.</small></div></div></div>
+<div class="no"><span>No</span></div>
+<div class="fila">
+<div class="q" data-n="h-saludo">¿Solo saluda?<small>hola, buenas, info…</small></div>
+<div class="flecha">Sí</div><div class="outs"><div class="o hog" data-n="h-saludo-o"><b>Le pregunta qué producto busca</b></div></div></div>
+<div class="no"><span>No</span></div>
+<div class="fila">
+<div class="q" data-n="h-ayuda">¿Pide una persona o habla de una compra?<small>ayuda, asesor, mi pedido, no llega, factura, reclamo…</small></div>
+<div class="flecha">Sí</div><div class="outs"><div class="o hog" data-n="h-ayuda-o"><b>Le ofrece hablar con Jair o consultar el pedido</b><small>Si pulsa Jair, su mensaje le llega ya escrito.</small></div></div></div>
+<div class="no"><span>No</span></div>
+<div class="fila">
+<div class="q" data-n="h-faq">¿Es una pregunta frecuente?</div>
+<div class="flecha">Sí</div><div class="outs"><div class="o hog" data-n="h-faq-o"><b>Responde al momento</b><div class="chips"><span>Cambios y garantía</span><span>Envíos</span><span>Formas de pago</span><span>Dirección y recojo</span><span>Horario</span><span>Catálogo y web</span></div></div></div></div>
+<div class="no"><span>No</span></div>
+<div class="fila">
+<div class="q" data-n="h-prod">¿Parece que busca un producto?<small>licuadora, sartén 28 cm, precio de…</small></div>
+<div class="flecha">Sí</div><div class="outs"><div class="o hog" data-n="h-prod-o"><b>Le muestra hasta 5 productos de corlima.pe</b><small>Con precio, descuento y enlace.</small></div><div class="o hog" data-n="h-sinprod"><b>No lo encuentra o la web no responde</b><small>Le pide otro nombre o le ofrece el asesor.</small></div></div></div>
+<div class="no"><span>No</span></div>
+<div class="fila">
+<div class="q resto" data-n="h-resto">Ninguna de las anteriores</div>
+<div class="flecha"></div><div class="outs"><div class="o hog" data-n="h-nada"><b>«No te he entendido» y los botones</b><small>Su mensaje le llega a Jair si pulsa su botón.</small></div></div></div>
+</section>
+<section class="sec" aria-labelledby="sec-c">
+<h3 id="sec-c">3 · Consulta de pedido</h3>
+<p>El código son 9 letras (la referencia de la tienda). Se consulta en vivo.</p>
+<div class="fila">
+<div class="q" data-n="c-ok">¿Encontró el pedido?</div>
+<div class="flecha">Sí</div><div class="outs"><div class="o ped" data-n="c-estado"><b>Le dice el estado en palabras simples</b><small>Nunca menciona fraude ni contracargos.</small><div class="chips"><span>Tu pago está confirmado y estamos preparando tu pedido.</span><span>El pago de este pedido no se completó.</span><span>Recibimos tu pedido y estamos validando el pago.</span><span>El pago de este pedido fue reembolsado.</span><span>Tu pedido está en revisión. Te recomendamos hablar con nuestro asesor.</span></div></div></div></div>
+<div class="no"><span>No</span></div>
+<div class="fila">
+<div class="q" data-n="c-caida">¿La tienda no respondió?</div>
+<div class="flecha">Sí</div><div class="outs"><div class="o ped" data-n="c-caida-o"><b>Pasa con Jair</b><small>Con el código ya escrito en el mensaje.</small></div></div></div>
+<div class="no"><span>No</span></div>
+<div class="fila">
+<div class="q resto" data-n="c-resto">Código mal escrito o que no existe</div>
+<div class="flecha"></div><div class="outs"><div class="o ped" data-n="c-reintento"><b>1.er intento: le pide que lo revise</b></div><div class="o ped" data-n="c-jair"><b>2.º intento: pasa con Jair</b><small>Con el código ya escrito.</small></div></div></div>
+</section>
+</div>
+</div>
+</main>
+<script type="module" src="bot.js"></script>
+<script>
+const SELLERS={"Anthony":"anthony","García":"garcia","Jair":"jair"};
+const $=id=>document.getElementById(id);
+const chat=$('chat');
+const el=(tag,cls,txt)=>{const e=document.createElement(tag);if(cls)e.className=cls;if(txt!=null)e.textContent=txt;return e};
+const clock=()=>new Date().toLocaleTimeString('es-PE',{hour:'2-digit',minute:'2-digit',hour12:false,timeZone:'America/Lima'});
+// Negritas, tachados y enlaces como en WhatsApp (el texto se escapa antes).
+const esc=s=>s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);
+const fmt=s=>esc(s).replace(/(https?:\/\/[^\s<]+)/g,'<a href="$1" target="_blank" rel="noopener">$1</a>').replace(/\*([^*\n]+)\*/g,'<b>$1</b>').replace(/~([^~\n]+)~/g,'<s>$1</s>');
+const toEnd=c=>{c.scrollTop=c.scrollHeight};
+const client=()=>({from:$('w').value.trim(),name:$('n').value.trim()});
+const HINT='Escribe «hola» para empezar, como lo haría un cliente.';
+const hint=()=>{if(!chat.children.length)chat.appendChild(el('p','empty',HINT))};
+const clearHint=()=>{const e=chat.querySelector('.empty');if(e)e.remove()};
+
+const ORDEN={a:['d-boton','d-menu','d-codigo','d-eligio','d-resto'],b:['h-media','h-saludo','h-ayuda','h-faq','h-prod','h-resto'],c:['c-ok','c-caida','c-resto']};
+function camino(p,r){
+  if(!r||r.skipped)return null;
+  const tramo=(sec,hasta,fin)=>{const o=ORDEN[sec];return{pasos:o.slice(0,o.indexOf(hasta)),si:hasta,fin}};
+  const t=[];
+  if(p.replyId){
+    const fin={"pedido":'o-pedido',"hogar":'o-hogar',"asesor_hogar":'o-jair'}[p.replyId]||'o-negocio';
+    t.push(tramo('a','d-boton',fin));return t;
+  }
+  if(r.reason==='pidió menú'){t.push(tramo('a','d-menu','o-menu'));return t}
+  if(r.retryCode||r.order){
+    t.push(tramo('a','d-codigo','o-codigo'));
+    if(r.retryCode)t.push(tramo('c','c-resto','c-reintento'));
+    else if(String(r.order).startsWith('encontrado'))t.push(tramo('c','c-ok','c-estado'));
+    else if(r.order==='tienda sin respuesta')t.push(tramo('c','c-caida','c-caida-o'));
+    else t.push(tramo('c','c-resto','c-jair'));
+    return t;
+  }
+  if(r.reason==='recurrente'){t.push(tramo('a','d-eligio','o-recurrente'));return t}
+  if(r.help){
+    t.push(tramo('a','d-eligio','o-conversa'));
+    const b={'sin texto':['h-media','h-media-o'],'saludo':['h-saludo','h-saludo-o'],'ayuda':['h-ayuda','h-ayuda-o'],'faq':['h-faq','h-faq-o'],'productos':['h-prod','h-prod-o'],'sin productos':['h-prod','h-sinprod']}[r.reason]||['h-resto','h-nada'];
+    t.push(tramo('b',b[0],b[1]));return t;
+  }
+  if(r.menu)t.push(tramo('a','d-resto',r.reason==='sin elegir'?'o-insiste':'o-bienvenida'));
+  return t.length?t:null;
+}
+const nodo=id=>document.querySelector('#arbol [data-n="'+id+'"]');
+const etiqueta=id=>{const n=nodo(id);return n?n.firstChild.textContent.trim():id};
+const historial=[];
+function iluminar(i){
+  const h=historial[i],arbol=$('arbol');
+  arbol.querySelectorAll('.paso,.si,.on').forEach(n=>n.classList.remove('paso','si','on'));
+  $('hist').querySelectorAll('button').forEach((b,j)=>b.setAttribute('aria-pressed',String(j===i)));
+  const ruta=$('ruta');ruta.innerHTML='';
+  ruta.appendChild(el('span','msg','«'+h.texto+'»'));
+  if(!h.t){ruta.appendChild(el('span','sep','→ mensaje repetido, no se contesta'));arbol.classList.remove('lit');return}
+  arbol.classList.add('lit');
+  h.t.forEach(tr=>{
+    tr.pasos.forEach(id=>nodo(id)?.classList.add('paso'));
+    nodo(tr.si)?.classList.add('si');nodo(tr.fin)?.classList.add('on');
+    ruta.appendChild(el('span','sep','→'));ruta.appendChild(el('span','paso',etiqueta(tr.si)));
+  });
+  ruta.appendChild(el('span','sep','→'));ruta.appendChild(el('span','fin',etiqueta(h.t[h.t.length-1].fin)));
+  const fin=nodo(h.t[h.t.length-1].fin);
+  if(fin&&arbol.offsetParent){const top=fin.getBoundingClientRect().top-arbol.getBoundingClientRect().top;if(top<120||top>arbol.clientHeight-40)arbol.scrollTo({top:arbol.scrollTop+top-arbol.clientHeight/2,behavior:matchMedia('(prefers-reduced-motion:reduce)').matches?'auto':'smooth'})}
+}
+function anotar(p,r){
+  const texto=p.replyTitle?'['+p.replyTitle+']':p.text||'🎤 Audio';
+  historial.push({texto,t:camino(p,r)});
+  const i=historial.length-1,b=el('button',null,texto);b.type='button';b.title=texto;b.onclick=()=>iluminar(i);
+  $('hist').appendChild(b);b.scrollIntoView({block:'nearest',inline:'end'});
+  iluminar(i);
+}
+function borrarRecorrido(){
+  historial.length=0;$('hist').innerHTML='';$('arbol').classList.remove('lit');
+  $('arbol').querySelectorAll('.paso,.si,.on').forEach(n=>n.classList.remove('paso','si','on'));
+  $('ruta').innerHTML='<span class="sep">Todavía no hay mensajes en esta prueba.</span>';
+}
+
+const mobile=matchMedia('(max-width:720px),(max-height:500px) and (pointer:coarse)');
+
+// Pestañas del móvil: lo que se ve al volver a una es siempre el final del chat.
+const unread={cliente:0,asesor:0};
+function badge(tab){const d=$('dot-'+tab);d.textContent=unread[tab];d.hidden=!unread[tab]}
+function activeChat(){
+  const tab=$('app').dataset.tab;
+  if(tab==='asesor')return $('chat-sel');
+  if(tab==='arbol')return null;
+  if(tab==='cliente')return $('s-adv').classList.contains('off')?chat:$('chat-adv');
+  return null;
+}
+function setTab(tab){
+  $('app').dataset.tab=tab;
+  ['cliente','asesor','arbol','ajustes'].forEach(t=>$('tab-'+t).setAttribute('aria-selected',String(t===tab)));
+  if(tab in unread){unread[tab]=0;badge(tab)}
+  const c=activeChat();if(c)toEnd(c);
+}
+['cliente','asesor','arbol','ajustes'].forEach(t=>{$('tab-'+t).onclick=()=>setTab(t)});
+// Escritorio: simulación completa o el cliente junto al árbol de decisiones.
+function setView(v){$('app').dataset.view=v;$('v-sim').setAttribute('aria-pressed',String(v==='sim'));$('v-arbol').setAttribute('aria-pressed',String(v==='arbol'));toEnd(chat)}
+$('v-sim').onclick=()=>setView('sim');$('v-arbol').onclick=()=>setView('arbol');
+// iOS no encoge la página al abrir el teclado: se ajusta a la zona visible para que la barra de escribir no quede debajo.
+const vv=window.visualViewport;
+function fit(){
+  if(!vv)return;
+  if(!mobile.matches){document.documentElement.style.removeProperty('--alto');return}
+  document.documentElement.style.setProperty('--alto',vv.height+'px');
+  window.scrollTo(0,0);
+  const c=activeChat();if(c)toEnd(c);
+}
+if(vv)vv.addEventListener('resize',fit);
+mobile.addEventListener('change',fit);
+fit();
+
+function show(m){
+  clearHint();
+  const b=el('div','b in');
+  const it=m.interactive;
+  const t=el('div');t.innerHTML=fmt(it?it.body.text:m.text.body);b.appendChild(t);
+  if(it){
+    const box=el('div','btns');
+    if(it.type==='button')it.action.buttons.forEach(x=>{const k=el('button',null,x.reply.title);k.onclick=()=>{box.querySelectorAll('button').forEach(z=>z.disabled=true);send({replyId:x.reply.id,replyTitle:x.reply.title})};box.appendChild(k)});
+    if(it.type==='list')it.action.sections[0].rows.forEach(x=>{const k=el('button',null,x.title);k.onclick=()=>send({replyId:x.id,replyTitle:x.title});box.appendChild(k)});
+    if(it.type==='cta_url'){
+      const k=el('button',null,'↗ '+it.action.parameters.display_text);
+      k.onclick=()=>openAdvisor(it.action.parameters.display_text.replace(/^Hablar con /,''),new URL(it.action.parameters.url).searchParams.get('text'));
+      box.appendChild(k);
+    }
+    b.appendChild(box);
+  }
+  chat.appendChild(b);toEnd(chat);
+}
+async function send(p){
+  clearHint();
+  chat.appendChild(el('div','b out',p.replyTitle||p.text||'🎤 Audio'));toEnd(chat);
+  try{
+    const r=await fetch('/simulador/enviar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({...p,...client()})});
+    if(!r.ok)throw new Error(r.status);
+    const j=await r.json();(j.salida||[]).forEach(show);
+    let res=null;try{res=JSON.parse(j.info)}catch{}
+    anotar(p,res);
+    if(!j.salida||!j.salida.length)chat.appendChild(el('div','b in','(el bot no respondió: '+(j.info||'sin respuesta')+')'));
+  }catch{
+    chat.appendChild(el('div','b in','(No llegó al simulador. Revisa la conexión y vuelve a intentarlo.)'));
+  }
+  toEnd(chat);
+}
+
+// Chat con el asesor: se abre como lo haría WhatsApp al pulsar el enlace, en un
+// chat aparte y con el mensaje escrito, pero sin enviar.
+let threads={};
+let current=null;
+function bubble(where,cls,text,time){
+  const b=el('div','b '+cls);b.appendChild(el('div',null,text));b.appendChild(el('time',null,time));
+  where.appendChild(b);toEnd(where);
+}
+function paint(){
+  const c=$('chat-adv'),s=$('chat-sel');
+  c.innerHTML='';s.innerHTML='';
+  const msgs=threads[current]||[];
+  msgs.forEach(m=>{bubble(c,m.who==='cliente'?'out':'in',m.text,m.time);bubble(s,m.who==='cliente'?'in':'out',m.text,m.time)});
+  if(!msgs.length){const e=el('p','empty','Cuando el cliente pulse «Enviar», aquí lo recibe '+current+'.');s.appendChild(e)}
+  $('who-seller').textContent='Móvil de '+current;
+  $('tab-asesor-txt').textContent=current;
+  $('cli-name').textContent=client().name||'Cliente';
+  $('cli-num').textContent='+'+client().from;
+  $('t-sel').disabled=!msgs.length;
+  $('ver').href='/panel/chats?canal='+SELLERS[current]+'&wa='+client().from;
+  $('ver').textContent='Ver este chat en el panel de Carlos →';
+}
+function openAdvisor(short,prefill){
+  current=short;
+  threads[current]=threads[current]||[];
+  $('adv-name').textContent=short;
+  $('s-adv').classList.remove('off');
+  $('t-adv').value=threads[current].length?'':prefill;
+  grow($('t-adv'));
+  paint();
+  // Con pantalla táctil el teclado taparía el chat nada más abrirlo.
+  if(matchMedia('(pointer:fine)').matches)$('t-adv').focus();
+}
+async function say(who,text){
+  threads[current].push({who,text,time:clock()});paint();
+  // En el móvil el otro teléfono está en otra pestaña: se avisa con un contador.
+  const other=who==='cliente'?'asesor':'cliente';
+  if(mobile.matches&&$('app').dataset.tab!==other){unread[other]++;badge(other)}
+  try{
+    const r=await fetch('/simulador/asesor',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({...client(),seller:SELLERS[current],who,text})});
+    if(!r.ok)throw new Error(r.status);
+  }catch{
+    const where=who==='cliente'?$('chat-adv'):$('chat-sel');
+    where.appendChild(el('div','b in','(No se guardó en el panel. Revisa la conexión.)'));toEnd(where);
+  }
+}
+function grow(t){t.style.height='38px';t.style.height=Math.min(t.scrollHeight,110)+'px'}
+function wire(form,input,handler){
+  const go=e=>{e.preventDefault();const v=input.value.trim();if(!v||input.disabled)return;handler(v);input.value='';grow(input)};
+  form.onsubmit=go;
+  input.onkeydown=e=>{if(e.key==='Enter'&&!e.shiftKey)go(e)};
+  input.oninput=()=>grow(input);
+}
+wire($('f'),$('t'),v=>send({text:v}));
+wire($('f-adv'),$('t-adv'),v=>say('cliente',v));
+wire($('f-sel'),$('t-sel'),v=>say('asesor',v));
+$('back').onclick=()=>$('s-adv').classList.add('off');
+$('audio').onclick=()=>{setTab('cliente');send({mediaType:'audio'})};
+$('nuevo').onclick=()=>{
+  $('w').value='519'+String(Math.floor(Math.random()*1e8)).padStart(8,'0');
+  chat.innerHTML='';threads={};current=null;hint();borrarRecorrido();
+  unread.cliente=unread.asesor=0;badge('cliente');badge('asesor');
+  $('tab-asesor-txt').textContent='Asesor';
+  setTab('cliente');
+  $('s-adv').classList.add('off');
+  $('chat-adv').innerHTML='';
+  const s=$('chat-sel');s.innerHTML='';s.appendChild(el('p','empty','Cuando el cliente pulse «Hablar con…» y envíe su mensaje, aquí lo recibe el asesor.'));
+  $('who-seller').textContent='Móvil del asesor';$('cli-name').textContent='Sin chat abierto';$('cli-num').textContent='WhatsApp Business del asesor';$('t-sel').disabled=true;
+  $('ver').href='/panel/chats';$('ver').textContent='Abrir el panel de Carlos →';
+};
+hint();
+</script></body></html>
