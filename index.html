@@ -106,6 +106,10 @@ header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-be
 main[data-view=sim]>#p-arbol{display:none}
 main[data-view=arbol]{grid-template-columns:minmax(300px,400px) minmax(0,1fr)}
 main[data-view=arbol]>#p-asesor,main[data-view=arbol]>#p-ajustes{display:none}
+main[data-view=sim]>#p-panel,main[data-view=arbol]>#p-panel{display:none}
+main[data-view=panel]{display:block}
+main[data-view=panel]>div:not(#p-panel),main[data-view=panel]>aside{display:none}
+#panel-frame{display:block;width:100%;height:min(80vh,800px);border:1px solid var(--linea);border-radius:12px;background:#fff}
 @media (prefers-reduced-motion:reduce){.screen{transition:opacity 150ms ease}.screen.off{transform:none}}
 /* En el móvil no caben dos teléfonos: cada uno ocupa la pantalla y se cambia con las pestañas. */
 @media (max-width:720px),(max-height:500px) and (pointer:coarse){
@@ -118,9 +122,11 @@ main[data-view=arbol]>#p-asesor,main[data-view=arbol]>#p-ajustes{display:none}
   .mtabs button:active{background:var(--niebla)}
   .mtabs .dot{min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:#00A884;color:#fff;font-size:11px;line-height:18px;text-align:center;font-variant-numeric:tabular-nums}
   .mtabs .dot[hidden]{display:none}
+  .mtabs button:nth-last-child(n+5),.mtabs button:nth-last-child(n+5)~button{padding:0 2px;font-size:13px;gap:4px}
   main{display:block;flex:1;min-height:0;width:100%;max-width:none;padding:0;margin:0}
   main>div,main>aside{display:none;height:100%}
-  main[data-tab=cliente]>#p-cliente,main[data-tab=asesor]>#p-asesor,main[data-tab=ajustes]>#p-ajustes,main[data-tab=arbol]>#p-arbol{display:block}
+  main[data-tab=cliente]>#p-cliente,main[data-tab=asesor]>#p-asesor,main[data-tab=ajustes]>#p-ajustes,main[data-tab=arbol]>#p-arbol,main[data-tab=panel]>#p-panel{display:block}
+  #panel-frame{height:100%;border:0;border-radius:0}
   .tree{height:100%;border:0;border-radius:0}
   .who{display:none}
   .phone{height:100%;border:0;border-radius:0}
@@ -137,13 +143,14 @@ main[data-view=arbol]>#p-asesor,main[data-view=arbol]>#p-ajustes{display:none}
   aside p a{display:inline-block;padding:10px 0}
 }
 @media (pointer:coarse){.bar textarea,aside input{font-size:16px}}
-#ver{display:none}</style></head><body>
+</style></head><body>
 <header><div><h1>Simulador del bot de recepción</h1><p>Prueba el recorrido completo: el cliente con el bot y después con su asesor. No se envía nada a WhatsApp.</p></div>
-<div class="vista" role="group" aria-label="Vista"><button type="button" id="v-sim" aria-pressed="true">Simulación</button><button type="button" id="v-arbol" aria-pressed="false">Árbol de decisiones</button></div></header>
+<div class="vista" role="group" aria-label="Vista"><button type="button" id="v-sim" aria-pressed="true">Simulación</button><button type="button" id="v-arbol" aria-pressed="false">Árbol de decisiones</button><button type="button" id="v-panel" aria-pressed="false">Panel de Carlos</button></div></header>
 <nav class="mtabs" role="tablist" aria-label="Móviles de la simulación">
   <button type="button" role="tab" id="tab-cliente" aria-selected="true">Cliente<span class="dot" id="dot-cliente" hidden></span></button>
   <button type="button" role="tab" id="tab-asesor" aria-selected="false"><span id="tab-asesor-txt">Asesor</span><span class="dot" id="dot-asesor" hidden></span></button>
   <button type="button" role="tab" id="tab-arbol" aria-selected="false">Árbol</button>
+<button type="button" role="tab" id="tab-panel" aria-selected="false">Panel</button>
   <button type="button" role="tab" id="tab-ajustes" aria-selected="false">Ajustes</button>
 </nav>
 <main id="app" data-tab="cliente" data-view="sim">
@@ -156,7 +163,7 @@ main[data-view=arbol]>#p-asesor,main[data-view=arbol]>#p-ajustes{display:none}
       <form class="bar" id="f"><textarea id="t" placeholder="Escribe un mensaje" autocomplete="off" enterkeyhint="send" aria-label="Mensaje al bot"></textarea><button>Enviar</button></form>
     </div>
     <div class="screen off" id="s-adv">
-      <div class="top"><button class="back" id="back" type="button" aria-label="Volver al chat de Corlima">‹</button><div><span id="adv-name"></span><small>Asesor de Corlima</small></div></div>
+      <div class="top"><button class="back" id="back" type="button" aria-label="Volver al chat de Corlima">‹</button><div><span id="adv-name"></span><small>Asesor de Corlima</small></div><button class="reset" id="reiniciar-adv" type="button">↻ Reiniciar chat</button></div>
       <div class="chat" id="chat-adv"></div>
       <form class="bar" id="f-adv"><textarea id="t-adv" placeholder="Escribe un mensaje" enterkeyhint="send" aria-label="Mensaje al asesor"></textarea><button>Enviar</button></form>
     </div>
@@ -257,6 +264,7 @@ main[data-view=arbol]>#p-asesor,main[data-view=arbol]>#p-ajustes{display:none}
 </section>
 </div>
 </div>
+<div id="p-panel"><iframe id="panel-frame" title="Panel de Carlos"></iframe></div>
 </main>
 <script type="module" src="bot.js"></script>
 <script>
@@ -346,18 +354,40 @@ function activeChat(){
   if(tab==='cliente')return $('s-adv').classList.contains('off')?chat:$('chat-adv');
   return null;
 }
+const TABS=[...document.querySelectorAll('.mtabs [role=tab]')].map(b=>b.id.slice(4));
 function setTab(tab){
   $('app').dataset.tab=tab;
-  ['cliente','asesor','arbol','ajustes'].forEach(t=>$('tab-'+t).setAttribute('aria-selected',String(t===tab)));
+  TABS.forEach(t=>$('tab-'+t).setAttribute('aria-selected',String(t===tab)));
   if(tab in unread){unread[tab]=0;badge(tab)}
   const c=activeChat();if(c)toEnd(c);
   // El árbol estaba oculto al llegar el mensaje: se lleva ahora al paso iluminado.
+  if(tab==='panel')showPanel();
   if(tab==='arbol'){const i=[...$('hist').children].findIndex(b=>b.getAttribute('aria-pressed')==='true');if(i>=0)iluminar(i)}
 }
-['cliente','asesor','arbol','ajustes'].forEach(t=>{$('tab-'+t).onclick=()=>setTab(t)});
+TABS.forEach(t=>{$('tab-'+t).onclick=()=>setTab(t)});
 // Escritorio: simulación completa o el cliente junto al árbol de decisiones.
-function setView(v){$('app').dataset.view=v;$('v-sim').setAttribute('aria-pressed',String(v==='sim'));$('v-arbol').setAttribute('aria-pressed',String(v==='arbol'));toEnd(chat)}
-$('v-sim').onclick=()=>setView('sim');$('v-arbol').onclick=()=>setView('arbol');
+const VIEWS=[...document.querySelectorAll('.vista button')].map(b=>b.id.slice(2));
+function setView(v){$('app').dataset.view=v;VIEWS.forEach(x=>$('v-'+x).setAttribute('aria-pressed',String(x===v)));if(v==='panel')showPanel();else toEnd(chat)}
+VIEWS.forEach(v=>{$('v-'+v).onclick=()=>setView(v)});
+// Panel de Carlos dentro de la página (solo en la versión sin servidor).
+let panelUrl='/panel?dias=1';
+async function showPanel(u){
+  if(u)panelUrl=u;
+  const f=$('panel-frame');if(!f||!window.renderPanel)return;
+  f.srcdoc=await window.renderPanel(panelUrl);
+}
+if($('panel-frame')){
+  $('panel-frame').onload=()=>{
+    $('panel-frame').contentDocument.addEventListener('click',e=>{
+      const a=e.target.closest('a');if(!a)return;
+      const h=a.getAttribute('href')||'';
+      if(h.startsWith('/panel.csv')){e.preventDefault();window.downloadPanelCsv(h)}
+      else if(h.startsWith('/panel')){e.preventDefault();showPanel(h)}
+      else if(h.startsWith('?')){e.preventDefault();showPanel(panelUrl.split('?')[0]+h)}
+    });
+  };
+  $('ver').onclick=e=>{e.preventDefault();showPanel($('ver').getAttribute('href'));if(mobile.matches)setTab('panel');else setView('panel')};
+}
 // iOS no encoge la página al abrir el teclado: se ajusta a la zona visible para que la barra de escribir no quede debajo.
 const vv=window.visualViewport;
 function fit(){
@@ -475,6 +505,6 @@ $('nuevo').onclick=()=>{
   $('who-seller').textContent='Móvil del asesor';$('cli-name').textContent='Sin chat abierto';$('cli-num').textContent='WhatsApp Business del asesor';$('t-sel').disabled=true;
   $('ver').href='/panel/chats';$('ver').textContent='Abrir el panel de Carlos →';
 };
-$('reiniciar').onclick=()=>$('nuevo').click();
+$('reiniciar').onclick=$('reiniciar-adv').onclick=()=>$('nuevo').click();
 hint();
 </script></body></html>
